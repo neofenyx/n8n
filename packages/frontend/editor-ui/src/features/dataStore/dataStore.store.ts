@@ -21,8 +21,6 @@ export const useDataStoreStore = defineStore(DATA_STORE_STORE, () => {
 			skip: (page - 1) * pageSize,
 			take: pageSize,
 		});
-		console.log('Data stores fetched:', response);
-
 		dataStores.value = response.data;
 		totalCount.value = response.count;
 	};
