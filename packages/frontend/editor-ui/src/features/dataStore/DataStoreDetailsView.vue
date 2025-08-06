@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import type { DataStoreEntity } from '@/features/dataStore/datastore.types';
-import { useDataStoreStore } from './dataStore.store';
+import { useDataStoreStore } from '@/features/dataStore/dataStore.store';
 import { useToast } from '@/composables/useToast';
 import { useI18n } from '@n8n/i18n';
 import { useRouter } from 'vue-router';
-import { DATA_STORE_VIEW } from './constants';
-import DataStoreBreadcrumbs from './components/DataStoreBreadcrumbs.vue';
+import { DATA_STORE_VIEW } from '@/features/dataStore/constants';
+import DataStoreBreadcrumbs from '@/features/dataStore/components/DataStoreBreadcrumbs.vue';
+import { useDocumentTitle } from '@/composables/useDocumentTitle';
 
 type Props = {
 	id: string;
@@ -18,6 +19,7 @@ const props = defineProps<Props>();
 const toast = useToast();
 const i18n = useI18n();
 const router = useRouter();
+const documentTitle = useDocumentTitle();
 
 const dataStoreStore = useDataStoreStore();
 
@@ -57,6 +59,7 @@ const onAddColumnClick = () => {
 };
 
 onMounted(async () => {
+	documentTitle.set(i18n.baseText('dataStore.dataStores'));
 	await initialize();
 });
 </script>

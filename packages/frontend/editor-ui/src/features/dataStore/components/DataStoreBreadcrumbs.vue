@@ -7,7 +7,7 @@ import type { PathItem } from '@n8n/design-system/components/N8nBreadcrumbs/Brea
 import { useRouter } from 'vue-router';
 import DataStoreActions from '@/features/dataStore/components/DataStoreActions.vue';
 import { DATA_STORE_VIEW } from '@/features/dataStore/constants';
-import { useDataStoreStore } from '../dataStore.store';
+import { useDataStoreStore } from '@/features/dataStore/dataStore.store';
 import { useToast } from '@/composables/useToast';
 
 const BREADCRUMBS_SEPARATOR = '›';

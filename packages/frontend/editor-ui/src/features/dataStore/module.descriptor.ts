@@ -68,7 +68,7 @@ export const DataStoreModule: FrontendModuleDescription = {
 	projectTabs: {
 		overview: [
 			{
-				label: i18n.baseText('dataStore.tab.label'),
+				label: i18n.baseText('dataStore.dataStores'),
 				value: DATA_STORE_VIEW,
 				to: {
 					name: DATA_STORE_VIEW,
@@ -77,7 +77,7 @@ export const DataStoreModule: FrontendModuleDescription = {
 		],
 		project: [
 			{
-				label: i18n.baseText('dataStore.tab.label'),
+				label: i18n.baseText('dataStore.dataStores'),
 				value: PROJECT_DATA_STORES,
 				dynamicRoute: {
 					name: PROJECT_DATA_STORES,

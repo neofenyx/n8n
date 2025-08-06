@@ -69,7 +69,7 @@ export const useDataStoreStore = defineStore(DATA_STORE_STORE, () => {
 		const response = await fetchDataStoresApi(rootStore.restApiContext, projectId, undefined, {
 			id: datastoreId,
 		});
-		if (response.data.length === 1) {
+		if (response.data.length > 0) {
 			return response.data[0];
 		}
 		return null;

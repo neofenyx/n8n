@@ -139,7 +139,7 @@ const onProjectHeaderAction = (action: string) => {
 };
 
 onMounted(() => {
-	documentTitle.set(i18n.baseText('dataStore.tab.label'));
+	documentTitle.set(i18n.baseText('dataStore.dataStores'));
 });
 </script>
 <template>
