@@ -43,6 +43,7 @@ const {
 	onResizeEnd,
 	onToggleOpen,
 	onPopOut,
+	onPopIn,
 	onChatPanelResize,
 	onChatPanelResizeEnd,
 	onOverviewPanelResize,
@@ -137,10 +138,6 @@ function handleChangeInputTableColumnCollapsing(columnName: string | null) {
 function handleChangeOutputTableColumnCollapsing(columnName: string | null) {
 	outputTableColumnCollapsing.value =
 		columnName && selected.value ? { nodeName: selected.value.node.name, columnName } : undefined;
-}
-
-function handleBack() {
-	window.close();
 }
 </script>
 
@@ -255,7 +252,7 @@ function handleBack() {
 				</N8nText>
 				<img src="/static/popout-instruction.png" />
 				<div :class="$style.popoutOnboardingButtons">
-					<N8nButton type="secondary" @click="handleBack">Go back</N8nButton>
+					<N8nButton type="secondary" @click="onPopIn">Go back</N8nButton>
 					<N8nButton @click="() => (isPopOutOnboarded = true)">Understood</N8nButton>
 				</div>
 			</div>
@@ -283,6 +280,7 @@ function handleBack() {
 	align-items: center;
 	justify-content: center;
 	z-index: 10;
+	background-color: var(--color-background-light);
 
 	& img {
 		width: 400px;
