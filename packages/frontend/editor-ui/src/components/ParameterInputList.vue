@@ -86,8 +86,14 @@ const nodeSettingsParameters = useNodeSettingsParameters();
 const asyncLoadingError = ref(false);
 const workflowHelpers = useWorkflowHelpers();
 const i18n = useI18n();
-const { dismissCallout, isCalloutDismissed, openRagStarterTemplate, isRagStarterCalloutVisible } =
-	useCalloutHelpers();
+const {
+	dismissCallout,
+	isCalloutDismissed,
+	openRagStarterTemplate,
+	openPreBuiltAgentsModal,
+	isRagStarterCalloutVisible,
+	isPreBuiltAgentsCalloutVisible,
+} = useCalloutHelpers();
 
 const { activeNode } = storeToRefs(ndvStore);
 
@@ -405,11 +411,27 @@ function isRagStarterCallout(parameter: INodeProperties): boolean {
 	return parameter.type === 'callout' && parameter.name === 'ragStarterCallout';
 }
 
+function isAgentDefaultCallout(parameter: INodeProperties): boolean {
+	return parameter.type === 'callout' && parameter.name === 'aiAgentStarterCallout';
+}
+
+function isPreBuiltAgentsCallout(parameter: INodeProperties): boolean {
+	return parameter.type === 'callout' && parameter.name === 'preBuiltAgentsCallout';
+}
+
 function isCalloutVisible(parameter: INodeProperties): boolean {
 	if (isCalloutDismissed(parameter.name)) return false;
 
 	if (isRagStarterCallout(parameter)) {
 		return isRagStarterCalloutVisible.value;
+	}
+
+	if (isAgentDefaultCallout(parameter)) {
+		return !isPreBuiltAgentsCalloutVisible.value;
+	}
+
+	if (isPreBuiltAgentsCallout(parameter)) {
+		return isPreBuiltAgentsCalloutVisible.value;
 	}
 
 	return true;
@@ -418,6 +440,8 @@ function isCalloutVisible(parameter: INodeProperties): boolean {
 function onCalloutAction(action: CalloutActionType) {
 	if (action === 'openRagStarterTemplate') {
 		openRagStarterTemplate(activeNode.value?.type ?? 'no active node');
+	} else if (action === 'openPreBuiltAgents') {
+		openPreBuiltAgentsModal();
 	}
 }
 

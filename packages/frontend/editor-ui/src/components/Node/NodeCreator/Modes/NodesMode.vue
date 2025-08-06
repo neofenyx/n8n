@@ -46,6 +46,7 @@ import { type INodeParameters } from 'n8n-workflow';
 import { isCommunityPackageName } from '@/utils/nodeTypesUtils';
 import { useNodeTypesStore } from '@/stores/nodeTypes.store';
 import { useCalloutHelpers } from '@/composables/useCalloutHelpers';
+import { useTelemetry } from '@/composables/useTelemetry';
 
 export interface Props {
 	rootView: 'trigger' | 'action';
@@ -58,6 +59,7 @@ const emit = defineEmits<{
 const i18n = useI18n();
 
 const calloutHelpers = useCalloutHelpers();
+const telemetry = useTelemetry();
 
 const { mergedNodes, actions, onSubcategorySelected } = useNodeCreatorStore();
 const { pushViewStack, popViewStack, isAiSubcategoryView } = useViewStacks();
@@ -223,9 +225,12 @@ function onSelected(item: INodeCreateElement) {
 	}
 
 	if (item.type === 'openTemplate') {
-		if (item.properties.key === 'rag-starter-template') {
-			void calloutHelpers.openRagStarterTemplate();
+		if (item.properties.templateId === 'rag-starter-template') {
+			telemetry.track('User clicked on RAG callout', {
+				node_type: null,
+			});
 		}
+		calloutHelpers.openSampleWorkflowTemplateById(item.properties.templateId);
 	}
 }
 

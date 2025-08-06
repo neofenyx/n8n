@@ -1332,7 +1332,8 @@ export type NodePropertyAction = {
 	target?: string;
 };
 
-export type CalloutActionType = 'openRagStarterTemplate';
+export type CalloutActionType = 'openRagStarterTemplate' | 'openPreBuiltAgents';
+
 export interface CalloutAction {
 	type: CalloutActionType;
 	label: string;

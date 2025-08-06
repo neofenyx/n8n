@@ -318,7 +318,7 @@ export function getRootSearchCallouts(search: string, { isRagStarterCalloutVisib
 			key: 'rag-starter-template',
 			type: 'openTemplate',
 			properties: {
-				key: 'rag-starter-template',
+				templateId: 'rag-starter-template',
 				title: i18n.baseText('nodeCreator.ragStarterTemplate.openTemplateItem.title'),
 				icon: 'database',
 				description: i18n.baseText('nodeCreator.ragStarterTemplate.openTemplateItem.description'),

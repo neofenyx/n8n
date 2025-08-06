@@ -712,7 +712,7 @@ export interface LinkItemProps {
 }
 
 export interface OpenTemplateItemProps {
-	key: 'rag-starter-template';
+	templateId: string; // Template ID
 	title: string;
 	description: string;
 	icon: string;
