@@ -61,9 +61,10 @@ export class UserRepository extends Repository<User> {
 
 	/** Counts the number of users in each role, e.g. `{ admin: 2, member: 6, owner: 1 }` */
 	async countUsersByRole() {
+		const escapedRoleSlug = this.manager.connection.driver.escape('roleSlug');
 		const rows = (await this.createQueryBuilder()
-			.select(['roleSlug', 'COUNT(roleSlug) as count'])
-			.groupBy('roleSlug')
+			.select([escapedRoleSlug, `COUNT(${escapedRoleSlug}) as count`])
+			.groupBy(escapedRoleSlug)
 			.execute()) as Array<{ roleSlug: string; count: string }>;
 		return rows.reduce(
 			(acc, row) => {
