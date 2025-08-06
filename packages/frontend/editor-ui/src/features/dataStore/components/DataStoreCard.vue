@@ -26,7 +26,7 @@ const emit = defineEmits<{
 	];
 }>();
 
-const renameInput = useTemplateRef('renameInput');
+const renameInput = useTemplateRef<{ forceFocus?: () => void }>('renameInput');
 
 const dataStoreRoute = computed(() => {
 	return {
@@ -43,7 +43,7 @@ const onRename = () => {
 	// We need this timeout to ensure action toggle is closed before focusing
 	if (renameInput.value?.forceFocus) {
 		setTimeout(() => {
-			renameInput.value?.forceFocus();
+			renameInput.value?.forceFocus?.();
 		}, 100);
 	}
 };
