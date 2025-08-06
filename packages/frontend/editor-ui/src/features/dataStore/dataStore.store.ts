@@ -57,6 +57,24 @@ export const useDataStoreStore = defineStore(DATA_STORE_STORE, () => {
 		return updated;
 	};
 
+	const fetchDataStoreDetails = async (datastoreId: string, projectId: string) => {
+		const response = await fetchDataStoresApi(rootStore.restApiContext, projectId, undefined, {
+			id: datastoreId,
+		});
+		if (response.data.length === 1) {
+			return response.data[0];
+		}
+		return null;
+	};
+
+	const fetchOrFindDataStore = async (datastoreId: string, projectId: string) => {
+		const existingStore = dataStores.value.find((store) => store.id === datastoreId);
+		if (existingStore) {
+			return existingStore;
+		}
+		return await fetchDataStoreDetails(datastoreId, projectId);
+	};
+
 	return {
 		dataStores,
 		totalCount,
@@ -64,5 +82,7 @@ export const useDataStoreStore = defineStore(DATA_STORE_STORE, () => {
 		createDataStore,
 		deleteDataStore,
 		updateDataStore,
+		fetchDataStoreDetails,
+		fetchOrFindDataStore,
 	};
 });
