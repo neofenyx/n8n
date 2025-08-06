@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { IUser, UserAction } from '@/Interface';
 import type { DataStoreResource } from '@/features/dataStore/types';
-import { DATA_STORE_DETAILS } from '../constants';
+import { DATA_STORE_DETAILS } from '@/features/dataStore/constants';
 import { useI18n } from '@n8n/i18n';
 import { computed, useTemplateRef } from 'vue';
+import DataStoreActions from '@/features/dataStore/components/DataStoreActions.vue';
 
 type Props = {
 	dataStore: DataStoreResource;
-	actions?: Array<UserAction<IUser>>;
 	readOnly?: boolean;
 	showOwnershipBadge?: boolean;
 };
@@ -15,16 +14,14 @@ type Props = {
 const i18n = useI18n();
 
 const props = withDefaults(defineProps<Props>(), {
-	actions: () => [],
 	readOnly: false,
 	showOwnershipBadge: false,
 });
 
 const emit = defineEmits<{
-	action: [
+	rename: [
 		value: {
 			dataStore: DataStoreResource;
-			action: string;
 		},
 	];
 }>();
@@ -41,30 +38,21 @@ const dataStoreRoute = computed(() => {
 	};
 });
 
-const onCardAction = (action: string) => {
+const onRename = () => {
 	// Focus rename input if the action is rename
 	// We need this timeout to ensure action toggle is closed before focusing
-	if (action === 'rename') {
-		if (renameInput.value?.forceFocus) {
-			setTimeout(() => {
-				renameInput.value?.forceFocus();
-			}, 100);
-		}
-		return;
+	if (renameInput.value?.forceFocus) {
+		setTimeout(() => {
+			renameInput.value?.forceFocus();
+		}, 100);
 	}
-	// Otherwise, emit the action directly
-	emit('action', {
-		dataStore: props.dataStore,
-		action,
-	});
 };
 
 const onNameSubmit = (name: string) => {
 	if (props.dataStore.name === name) return;
 
-	emit('action', {
+	emit('rename', {
 		dataStore: { ...props.dataStore, name },
-		action: 'rename',
 	});
 };
 </script>
@@ -147,12 +135,10 @@ const onNameSubmit = (name: string) => {
 				</template>
 				<template #append>
 					<div :class="$style['card-actions']" @click.prevent>
-						<N8nActionToggle
-							v-if="props.actions.length"
-							:actions="props.actions"
-							theme="dark"
-							data-test-id="data-store-card-actions"
-							@action="onCardAction"
+						<DataStoreActions
+							:data-store="props.dataStore"
+							:is-read-only="props.readOnly"
+							@rename="onRename"
 						/>
 					</div>
 				</template>
