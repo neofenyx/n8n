@@ -9,9 +9,11 @@ import {
 	updateDataStoreApi,
 } from '@/features/dataStore/datastore.api';
 import type { DataStoreEntity } from '@/features/dataStore/datastore.types';
+import { useProjectsStore } from '@/stores/projects.store';
 
 export const useDataStoreStore = defineStore(DATA_STORE_STORE, () => {
 	const rootStore = useRootStore();
+	const projectStore = useProjectsStore();
 
 	const dataStores = ref<DataStoreEntity[]>([]);
 	const totalCount = ref(0);
@@ -27,6 +29,12 @@ export const useDataStoreStore = defineStore(DATA_STORE_STORE, () => {
 
 	const createDataStore = async (name: string, projectId?: string) => {
 		const newStore = await createDataStoreApi(rootStore.restApiContext, name, projectId);
+		if (!newStore.project && projectId) {
+			const project = await projectStore.fetchProject(projectId);
+			if (project) {
+				newStore.project = project;
+			}
+		}
 		dataStores.value.push(newStore);
 		totalCount.value += 1;
 		return newStore;
