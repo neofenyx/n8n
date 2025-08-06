@@ -55,55 +55,6 @@ describe('dataStore', () => {
 		await dataStoreService.deleteDataStoreAll();
 	});
 
-	// TODO: remove
-	describe('createDataStoreRaw', () => {
-		it('should succeed with existing name in different project', async () => {
-			const name = 'myDataStore2';
-
-			// ACT
-			const result = await dataStoreService.createDataStoreRaw(project1.id, {
-				name,
-				columns: [],
-			});
-
-			// ASSERT
-			expect(result).toEqual({
-				columns: [],
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				createdAt: expect.any(Date),
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				id: expect.any(String),
-				name,
-				projectId: project1.id,
-				sizeBytes: 0,
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-				updatedAt: expect.any(Date),
-			});
-
-			const created = await dataStoreRepository.findOneBy({ name, projectId: project1.id });
-			expect(created?.id).toBe(result.id);
-
-			const userTableName = toTableName(result.id);
-			const rows: Array<Record<string, unknown>> = await dataStoreRepository.manager.query(
-				`SELECT * FROM "${userTableName}"`,
-			);
-			expect(rows).toEqual([]);
-		});
-
-		it('should return an error if name/project combination already exists', async () => {
-			// ACT
-			const result = dataStoreService.createDataStoreRaw(project2.id, {
-				name: 'myDataStore2',
-				columns: [],
-			});
-
-			// ASSERT
-			await expect(result).rejects.toThrow(
-				"Data store with name 'myDataStore2' already exists in this project",
-			);
-		});
-	});
-
 	describe('createDataStore', () => {
 		it('should succeed with existing name in different project', async () => {
 			const name = 'myDataStore2';

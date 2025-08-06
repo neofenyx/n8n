@@ -49,41 +49,6 @@ function columnToWildcardAndType(column: DataStoreCreateColumnSchema) {
 	return `\`${column.name}\` ${dataStoreColumnTypeToSql(column.type)}`; // Postgres identifiers use double quotes
 }
 
-function getPrimaryKeyAutoIncrement(dbType: DataSourceOptions['type']) {
-	switch (dbType) {
-		case 'sqlite':
-		case 'sqlite-pooled':
-		case 'better-sqlite3':
-			return 'INTEGER PRIMARY KEY AUTOINCREMENT';
-		case 'postgres':
-		case 'aurora-postgres':
-			return 'INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY';
-		case 'mysql':
-		case 'aurora-mysql':
-		case 'mariadb':
-			return 'INT AUTO_INCREMENT PRIMARY KEY';
-	}
-
-	throw new UnexpectedError('Unexpected database type');
-}
-
-export function createUserTableQuery(
-	tableName: DataStoreUserTableName,
-	columns: DataStoreCreateColumnSchema[],
-	dbType: DataSourceOptions['type'],
-) {
-	if (columns.map((x) => x.name).some((name) => !isValidColumnName(name))) {
-		throw new UnexpectedError('bad column name');
-	}
-	const columnSql = columns.map(columnToWildcardAndType);
-	const columnsFieldQuery = columnSql.length > 0 ? `, ${columnSql.join(', ')}` : '';
-
-	const primaryKeyType = getPrimaryKeyAutoIncrement(dbType);
-
-	// The tableName here is selected by us based on the automatically generated id, not user input
-	return `CREATE TABLE IF NOT EXISTS ${tableName} (id ${primaryKeyType} ${columnsFieldQuery})`;
-}
-
 function isValidColumnName(name: string) {
 	// Only allow alphanumeric and underscore
 	return DATA_STORE_COLUMN_REGEX.test(name);

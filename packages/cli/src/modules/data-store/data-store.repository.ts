@@ -9,27 +9,12 @@ import { DataSource, EntityManager, Repository, SelectQueryBuilder } from '@n8n/
 import { UnexpectedError } from 'n8n-workflow';
 
 import { DataStoreEntity } from './data-store.entity';
-import { createUserTableQuery, toDslColumns, toTableName } from './utils/sql-utils';
+import { toDslColumns, toTableName } from './utils/sql-utils';
 
 @Service()
 export class DataStoreRepository extends Repository<DataStoreEntity> {
 	constructor(dataSource: DataSource) {
 		super(DataStoreEntity, dataSource.manager);
-	}
-
-	// TODO: remove
-	async createUserTableRaw(
-		projectId: string,
-		name: string,
-		columns: DataStoreCreateColumnSchema[],
-	) {
-		return await this.manager.transaction(async (em) => {
-			const dataStore = em.create(DataStoreEntity, { name, columns, projectId });
-			await em.insert(DataStoreEntity, dataStore);
-			const dbType = em.connection.options.type;
-			await em.query(createUserTableQuery(toTableName(dataStore.id), columns, dbType));
-			return dataStore;
-		});
 	}
 
 	async createUserTable(projectId: string, name: string, columns: DataStoreCreateColumnSchema[]) {
