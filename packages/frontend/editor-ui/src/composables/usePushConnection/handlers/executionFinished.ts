@@ -14,7 +14,7 @@ import { useNodeTypesStore } from '@/stores/nodeTypes.store';
 import { useSettingsStore } from '@/stores/settings.store';
 import { useUIStore } from '@/stores/ui.store';
 import { useWorkflowsStore } from '@/stores/workflows.store';
-import { getEasyAiWorkflowJson } from '@/utils/easyAiWorkflowUtils';
+import { getEasyAiWorkflowJson } from '@/utils/templates/workflowSamples';
 import {
 	clearPopupWindowState,
 	getExecutionErrorMessage,

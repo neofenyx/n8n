@@ -775,12 +775,19 @@ export const BATCH_11AUG_EXPERIMENT = {
 	variantStarterPack: 'variant-starter-pack-v2',
 };
 
+export const PRE_BUILT_AGENTS_EXPERIMENT = {
+	name: '038_pre_built_agents',
+	control: 'control',
+	variant: 'variant',
+};
+
 export const EXPERIMENTS_TO_TRACK = [
 	WORKFLOW_BUILDER_EXPERIMENT.name,
 	EXTRA_TEMPLATE_LINKS_EXPERIMENT.name,
 	TEMPLATE_ONBOARDING_EXPERIMENT.name,
 	NDV_UI_OVERHAUL_EXPERIMENT.name,
 	BATCH_11AUG_EXPERIMENT.name,
+	PRE_BUILT_AGENTS_EXPERIMENT.name,
 ];
 
 export const MFA_FORM = {

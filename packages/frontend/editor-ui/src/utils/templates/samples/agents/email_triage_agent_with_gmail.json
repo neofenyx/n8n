@@ -1,0 +1,240 @@
+{
+	"name": "Email Triage Agent (with Gmail)",
+	"meta": {
+		"templateCredsSetupCompleted": false,
+		"templateId": "email_triage_agent_with_gmail"
+	},
+	"nodes": [
+		{
+			"parameters": {
+				"pollTimes": {
+					"item": [
+						{
+							"mode": "everyMinute"
+						}
+					]
+				},
+				"simple": false,
+				"filters": {
+					"readStatus": "unread"
+				},
+				"options": {}
+			},
+			"id": "0280aa41-d55c-47e4-b99b-03b4c7c9e4e7",
+			"name": "New Email Trigger",
+			"type": "n8n-nodes-base.gmailTrigger",
+			"typeVersion": 1.3,
+			"position": [-64, -32],
+			"credentials": {
+				"gmailOAuth2": {
+					"id": "H4Vkp5Iwb0wrQOR6",
+					"name": "Gmail"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"promptType": "define",
+				"text": "=Categorize this email:\n\n**From:** {{ $json.from.value[0].address }}\n**Subject:** {{ $json.subject }}\n**Content:** \n{{ $json.html }}\n\nPlease analyze this email and apply appropriate labels using the available tools.",
+				"options": {
+					"systemMessage": "=You are an email categorization assistant. Your task is to analyze emails and apply appropriate labels to help organize the user's inbox.\n\nYou have access to two tools:\n1. **Get all Labels** - Retrieves available email labels\n2. **Add Labels** - Applies labels to emails\n\n### Instructions:\n- First, always use \"Get all Labels\" to see available categories\n- Analyze email content for: subject, sender, keywords, and context\n- Apply 1-3 most relevant labels per email\n- Be consistent in categorization patterns\n- If unsure between labels, choose the most specific one\n\n### Response Format:\n1. Brief summary of email content (1 sentence)\n2. Chosen labels with reasoning\n3. Use \"Add Labels\" tool with selected labels\n\nBe efficient and accurate. Focus on helping the user maintain an organized inbox."
+				}
+			},
+			"id": "a4dccc7a-008e-40c5-90dd-c91090a144fd",
+			"name": "Email Classification Agent",
+			"type": "@n8n/n8n-nodes-langchain.agent",
+			"typeVersion": 2.2,
+			"position": [224, -32]
+		},
+		{
+			"parameters": {
+				"operation": "addLabels",
+				"messageId": "={{ $json.id }}",
+				"labelIds": "={{ $fromAI('Label_Names_or_IDs', `Array of Gmail label ids to add. Use the id field from the \"Get all labels\" tool`, 'string') }}"
+			},
+			"id": "a5e4168b-1ce7-4cfe-ae6d-a1a4ab9b96df",
+			"name": "Add Label",
+			"type": "n8n-nodes-base.gmailTool",
+			"typeVersion": 2.1,
+			"position": [320, 192],
+			"webhookId": "e7289911-d937-45bd-9e91-410a0dc959f8",
+			"credentials": {
+				"gmailOAuth2": {
+					"id": "H4Vkp5Iwb0wrQOR6",
+					"name": "Gmail"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"descriptionType": "manual",
+				"toolDescription": "Use this tool to get all existing labels from Gmail",
+				"resource": "label",
+				"returnAll": true
+			},
+			"type": "n8n-nodes-base.gmailTool",
+			"typeVersion": 2.1,
+			"position": [464, 192],
+			"id": "79ee166d-4443-45c6-84e1-8820299cf2de",
+			"name": "Get all Labels",
+			"webhookId": "291b9995-7ae1-4f65-9ffb-ba62c980b829",
+			"credentials": {
+				"gmailOAuth2": {
+					"id": "H4Vkp5Iwb0wrQOR6",
+					"name": "Gmail"
+				}
+			}
+		},
+		{
+			"parameters": {
+				"content": "### Email Triage Agent\nAutomatically categorizes new, unread emails by analyzing their content and applying relevant labels using AI.\n\n#### Set up\n- Configure credentials in the **Gmail** and **Model** nodes\n- Create the labels you want to use in Gmail\n- Click **Execute workflow** button to test with the last email in your inbox\n\n#### Next steps\nTry setting up the agent to configure draft responses to important emails.\n",
+				"height": 384,
+				"width": 304,
+				"color": 5
+			},
+			"type": "n8n-nodes-base.stickyNote",
+			"position": [-464, -96],
+			"typeVersion": 1,
+			"id": "db4fcd5d-7f0a-41f6-9dd7-4100a63f38cc",
+			"name": "Sticky Note"
+		},
+		{
+			"parameters": {
+				"model": {
+					"__rl": true,
+					"value": "gpt-4.1-mini",
+					"mode": "list",
+					"cachedResultName": "gpt-4.1-mini"
+				},
+				"options": {}
+			},
+			"id": "1fda1d78-a669-4be1-9aba-56c0abb7c247",
+			"name": "Model",
+			"type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+			"typeVersion": 1.2,
+			"position": [160, 192],
+			"credentials": {
+				"openAiApi": {
+					"id": "AM5S7b55nmwWyVH4",
+					"name": "AI Assistant Service - n8n WFs"
+				}
+			}
+		}
+	],
+	"pinData": {
+		"New Email Trigger": [
+			{
+				"json": {
+					"id": "198764e3300a4336",
+					"threadId": "1986f4acd8e72c87",
+					"labelIds": ["UNREAD", "IMPORTANT", "CATEGORY_PERSONAL", "INBOX"],
+					"sizeEstimate": 10336,
+					"headers": {
+						"delivered-to": "Delivered-To: niklas@n8n.io",
+						"received": "Received: from smtpclient.apple ([102.33.32.34])\r\n        by smtp.gmail.com with ESMTPSA id 5b1f17b1804b1-459dc7e1ddesm39054245e9.27.2025.08.04.11.18.11\r\n        for <niklas@n8n.io>\r\n        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);\r\n        Mon, 04 Aug 2025 11:18:11 -0700 (PDT)",
+						"x-received": "X-Received: by 2002:a05:6000:2902:b0:3b7:895c:1562 with SMTP id ffacd0b85a97d-3b8d94649f4mr8933367f8f.11.1754331492107;\r\n        Mon, 04 Aug 2025 11:18:12 -0700 (PDT)",
+						"arc-seal": "ARC-Seal: i=1; a=rsa-sha256; t=1754331493; cv=none;\r\n        d=google.com; s=arc-20240605;\r\n        b=dsEbAp42tLuYqI1EcoWZuN8mCgePnzpaqI2gHtNebv5K1MhY9iICzojKq9JIBgDuED\r\n         NkF1Kounb/e5/y/fD5blEhB0czAnkwpawONzbYQIF06rS5+VFBvlVw4kZItbbHCDiW3Q\r\n         lRC2VuhQA19YfY8AVnH/wumF1lezxpgccKQns2zAuSghwrT0huAh3uqDBQGrE5QTuiQ0\r\n         OjrDR9RPkYc2j0wjarqVWW4JXC3zjzt2CZuaAM6bRFKZUUgeRSOkcNPgCr1EvisOB0oT\r\n         3UvS3g+CoiLSsejFeiBegsnZKwTetb9orVCSzDYilTj2fpt784X1vRB+7XLqlsK3Ik6l\r\n         SRgg==",
+						"arc-message-signature": "ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;\r\n        h=to:in-reply-to:references:message-id:date:subject:mime-version:from\r\n         :content-transfer-encoding:dkim-signature;\r\n        bh=nRnvKhyEs+oHx/cXSwT751bz5qToK7NPO2DVq5Ma40Y=;\r\n        fh=EwUs31ug7ohVL5M5AlqlPc1nChpUYh5t5/GBJjbmuVw=;\r\n        b=SLuBX3ASCdXLYOwrFGdyma+emgzWHnwFhPzNXAXvH5wmhdQ+7ql2GCNR83mxoHeZM+\r\n         1mkLWOEi6f0fmX/QPuf9qDZPwsh964/CSvxrG1Y03SShNG3b/9rlYtToYm38gock/0gV\r\n         LJQRL/n8LVctbeu3S/ygBKqocRBP1QLMJQg/nGTrHE6wOAgeX5Jz4Vtu1sHPRg09qutJ\r\n         6G3w/j9P+pl7CGcuPkhCsbs5zGe9i+VLzIJcQhCI1BJcYaO+0DAyUOAFCGqX6FiPy2Mk\r\n         SJRj61dKlI/Vmo+788ipe9ul50Y1rYU911v5MGZ45x+imCmuX7CiMKkrML1su24Ni4AZ\r\n         abzA==;\r\n        dara=google.com",
+						"arc-authentication-results": "ARC-Authentication-Results: i=1; mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Td4f2Wfn;\r\n       spf=pass (google.com: domain of josh.soarai@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=josh.soarai@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@n8n.io",
+						"return-path": "Return-Path: <josh.soarai@gmail.com>",
+						"received-spf": "Received-SPF: pass (google.com: domain of josh.soarai@gmail.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;",
+						"authentication-results": "Authentication-Results: mx.google.com;\r\n       dkim=pass header.i=@gmail.com header.s=20230601 header.b=Td4f2Wfn;\r\n       spf=pass (google.com: domain of josh.soarai@gmail.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=josh.soarai@gmail.com;\r\n       dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) header.from=gmail.com;\r\n       dara=pass header.i=@n8n.io",
+						"dkim-signature": "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=gmail.com; s=20230601; t=1754331492; x=1754936292; darn=n8n.io;\r\n        h=to:in-reply-to:references:message-id:date:subject:mime-version:from\r\n         :content-transfer-encoding:from:to:cc:subject:date:message-id\r\n         :reply-to;\r\n        bh=nRnvKhyEs+oHx/cXSwT751bz5qToK7NPO2DVq5Ma40Y=;\r\n        b=Td4f2Wfno6wvCQjmBQ6TcsnpUiPQqB74fTeyYGZVdrtYMGLVZlweMw5bPlEUKyZv9L\r\n         s67p1cMJRtfEoWdLyFRnF6CuI3FDLuabwj3JapWaERJ2B+PBg/X/Z6c4yo9MGg7oY6NS\r\n         m8bdS0Vy4kaK4HGegIkOmKiAeqhWFLlazZVRuYvldr9jrg5GYS/cyJs2/eAEeR98LtSl\r\n         BrqrYYIPcV9bAKkoFO+pymqGIYhu4t2e0CrIXN3Y7uwUZE1mr71/6Du0HbfDVg83gXT4\r\n         kGH4NJAE8yGWgx1ZEHpUvjfEhEIqjmHDa7iRIlxCe6zTOZEHmBCR5/etEKuNkXaH5DT2\r\n         UQNQ==",
+						"x-google-dkim-signature": "X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;\r\n        d=1e100.net; s=20230601; t=1754331492; x=1754936292;\r\n        h=to:in-reply-to:references:message-id:date:subject:mime-version:from\r\n         :content-transfer-encoding:x-gm-message-state:from:to:cc:subject\r\n         :date:message-id:reply-to;\r\n        bh=nRnvKhyEs+oHx/cXSwT751bz5qToK7NPO2DVq5Ma40Y=;\r\n        b=wyoNWieilPLI+/zMZhwPJ6w9uAVQdWwyR7qRGid4eRx79Y7hPdWhe5QIjcUoyIhSCS\r\n         YF/quSh0g5d1HmP/I1rD6xrxrafBxdXsI7W9r6p3xv14DFl/rJUDaN2j9XHGKmCanXy8\r\n         ZsMzNqeFc++TsY9zCqPGQhvoN1tBeeIOEjY/Ap3LBK6o+n5lVdwyHN1lWGp73uKLU/HC\r\n         SbozTnKl2LfN0iH7BPZLnMBDK5gM8Y+pXS8qhXITNfuBaZuP+bA+L45fsnOPdr1Gkr3K\r\n         UtUjFhsnH/OsxACvek64i5Vr34uNoMT8rgfO6ySrb0DWJyqC6HQkIsE9+4vBTFKuYo8m\r\n         hdXg==",
+						"x-gm-message-state": "X-Gm-Message-State: AOJu0Yxf0K42GZpeL1ntycWSMAOqFKiiulKLzWXdzIQqsH0HHZOUxHu+\r\n\t0qWkPrTz1Plns1IpjKBXrneqRbsJWQvJ5i5LxkO6TeQmQTusdRQTs0ZelueYYt/a",
+						"x-gm-gg": "X-Gm-Gg: ASbGncuI5pmEGRiJ0PHuBHVKWP58rqWqlk/Mi/FZd1f+5Ya106PnTWJLI84dMgqv5Ne\r\n\tZ/Ms6x28qHfNxhVBpzWWQ9ZG+OLD+WWXohTAriQOOHQOOXQTSosDWgABVsX6xOfmGm6rW13AmVt\r\n\t8LHdDZXhAMcVpQH/VMMvaWtUtwJLCBlA+JlB7BGNAkAHpjCYqChAyAitQVZ+OFVFcsZ/2SlKSWa\r\n\t0qGh1PN3wTiBMEaovjxOCN1Jg6PBOPrtFiZGTVftD8JJnDIn72phIlrhvrzbBD4DZIEYqgc5PU6\r\n\tewJbHknmqJnIyBhGnrtscHm2WejAa7r6sVRMDCvjV42tavmIMTjcz//uwTCnr+Q7VT76QQSO6Sa\r\n\tdMCGe/+a0gHJ9Rg6mKRCLc5p+9rY3AEy+4XzFIS8=",
+						"x-google-smtp-source": "X-Google-Smtp-Source: AGHT+IG1W/keumQJtv4AAMSAXc283c9XzuXf034zxDjhFE6VAwaxApDr4eed0u1/ckxDYhqdWVpkzg==",
+						"content-type": "Content-Type: multipart/alternative; boundary=Apple-Mail-D761EB49-9575-405C-954E-E668D4B0B713",
+						"content-transfer-encoding": "Content-Transfer-Encoding: 7bit",
+						"from": "From: Josh <josh.soarai@gmail.com>",
+						"mime-version": "Mime-Version: 1.0 (1.0)",
+						"subject": "Subject: Re: Final notice: Need updated n8n billing information",
+						"date": "Date: Mon, 4 Aug 2025 20:17:59 +0200",
+						"message-id": "Message-Id: <E7983492-8FE7-4B90-955F-59D24393F545@gmail.com>",
+						"references": "References: <CAMmGHAUPp99QF9QOHG5LugDmy6vUbaOUY_D2Oz4aQuciwsbkLw@mail.gmail.com>",
+						"in-reply-to": "In-Reply-To: <CAMmGHAUPp99QF9QOHG5LugDmy6vUbaOUY_D2Oz4aQuciwsbkLw@mail.gmail.com>",
+						"to": "To: Niklas Hatje <niklas@n8n.io>",
+						"x-mailer": "X-Mailer: iPhone Mail (22F76)"
+					},
+					"html": "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\"></head><body dir=\"auto\">Payment made<div><br></div><div>Thanks for the follow up&nbsp;<br><div><div dir=\"ltr\">Sent from my iPhone</div><div dir=\"ltr\"><br><blockquote type=\"cite\">On 04 Aug 2025, at 14:24, Niklas Hatje &lt;niklas@n8n.io&gt; wrote:<br><br></blockquote></div><blockquote type=\"cite\"><div dir=\"ltr\">﻿<div dir=\"ltr\">Hey Josh,<br><br>Thanks for the update. Let me know if you have any issues with the payment tonight.<br><br>Best<br>Nik</div><br><div class=\"gmail_quote gmail_quote_container\"><div dir=\"ltr\" class=\"gmail_attr\">On Mon, Aug 4, 2025 at 1:41 PM Josh &lt;<a href=\"mailto:josh.soarai@gmail.com\">josh.soarai@gmail.com</a>&gt; wrote:<br></div><blockquote class=\"gmail_quote\" style=\"margin:0px 0px 0px 0.8ex;border-left:1px solid rgb(204,204,204);padding-left:1ex\"><div dir=\"auto\">Hi Niklas&nbsp;<div><br></div><div>I will be able to make payment tonight at midnight SAST time zone&nbsp;</div><div><br></div><div>Thank you for the payment reminder<br id=\"m_-7888777921571695411lineBreakAtBeginningOfSignature\"><div dir=\"ltr\">Sent from my iPhone</div><div dir=\"ltr\"><br><blockquote type=\"cite\">On 29 Jul 2025, at 07:20, Niklas from n8n &lt;<a href=\"mailto:niklas@info.n8n.io\" target=\"_blank\">niklas@info.n8n.io</a>&gt; wrote:<br><br></blockquote></div><blockquote type=\"cite\"><div dir=\"ltr\">﻿\n\n\n\n\n\n\n  \n\n\n\n<div>\n<p style=\"margin-bottom:5px;margin-top:0px\">Hey Joshua,</p>\n\n\n  <p style=\"margin-bottom:5px\">We just tried to process the €27.60 subscription payment for the fourth time, but unfortunately it failed once again. </p>\n  <p style=\"margin-bottom:5px\"><a href=\"https://track.pstmrk.it/3s/n8n.io%2F%3F__pw_iic%3Dbb26febe-0823-44fc-8ae2-c097ec4ed6ca%26at%3D4/e08F/oQbGAQ/AQ/5e6bedcf-36a0-4ed1-a02a-7de9855c04be/1/RWnWNPartd\" target=\"_blank\">You can update your billing information here.</a> If the next charge fails, your account will be cancelled automatically.</p>\n  <p style=\"margin-bottom:5px\">Let us know if you have any questions,</p>\n\n</div>\n\n\n  <p style=\"margin:10px 0px 5px\">\n    —<br>\n    Niklas\n    <br>\n    \n      Product Manager\n    \n  </p>\n  \n    <img src=\"https://dna8twue3dlxq.cloudfront.net/images/company_logos/6fa69732-523d-4e5d-aad1-9f49c892e349-2023_05_24-17_01_26.png\" style=\"max-width: 100px;\" data-unique-identifier=\"\">\n    <br>\n  \n\n\n\n    \n\n\n\n    \n        <br><br>\n        \n\nThis order process is conducted by our online reseller &amp; Merchant of Record, Paddle.com, who also handle order related inquiries and returns.\n    \n\n\n\n    \n        <div style=\"display:none\">\n            <div id=\"m_-7888777921571695411paddle-hash\">77f7f26e9096efcb82844afce11ec231d9a1b17d96dd2dd70a894a3c65ea222327323ea4b6694a92c1fbdfc896f3</div>\n        </div>\n    \n\n\n\n    \n\n<img src=\"https://ea.pstmrk.it/open?m=v3_1.gPKbejQJ9ne6DQa8nRPaUw.NfnFlvlh6cLxeuOZPNHeZ91-BbMyrXEbQzRugNX2m2cm7UY08aOLMaVAjE18rOF9CwseEqqYn_Gz6EhfxJrgJhElzH9aOBCj-K3Y0fQmdgRYSikGEpUjYRgwTjpzRiOR55g3uof2iAMiSZIZw4reu7JtDMFasXHaytkjrBnVqg2UjD8NaO1ehxHSvYKtiZRPnC_qMHC1u3CilTNHRsg5DyXFZ23FM7znCnGJKJNLRPGjoUKqzzQX48Rprd8sphYXZzUfQQVhIiduEwZETl2mONzn2Lleb5Cf9LRTt3bxipYxzQ3m0MtHiLq6agS588_EPL8PuDUaRhb1n1HvwwVHkYGIwyXxDlxB6zo8MqebHxgxbfLriq1ImJWLGveugYgnN5mEwaNwNxvrhYHZfO3ohyw8cqxWFe7d194No4eHe6Ql7zh2PbJyNVY6uEaiOSbelP1ToLvnIBOJ18bnFQH17imEDj5i3MLqShD8v5NUV9GwxxPvMNgczKTHQJx1QbUoyUUMJUJmGDmww-AfpLIECwYKI4OgbHOl3qY1B6UdrX-SmFQLhDsIiYBcv4H0fuNORLwsQXxoGitR_UxxUZzYdB6pLX2e66pSg1obsxxxh2EYiPLGXECXoHl3LdleHbHY\" width=\"1\" height=\"1\" border=\"0\" alt=\"\" data-unique-identifier=\"\">\n</div></blockquote></div></div></blockquote></div>\n</div></blockquote></div></div></body></html>",
+					"subject": "Re: Final notice: Need updated n8n billing information",
+					"references": "<CAMmGHAUPp99QF9QOHG5LugDmy6vUbaOUY_D2Oz4aQuciwsbkLw@mail.gmail.com>",
+					"date": "2025-08-04T18:17:59.000Z",
+					"to": {
+						"value": [
+							{
+								"address": "niklas@n8n.io",
+								"name": "Niklas Hatje"
+							}
+						],
+						"html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Niklas Hatje</span> &lt;<a href=\"mailto:niklas@n8n.io\" class=\"mp_address_email\">niklas@n8n.io</a>&gt;</span>",
+						"text": "\"Niklas Hatje\" <niklas@n8n.io>"
+					},
+					"from": {
+						"value": [
+							{
+								"address": "josh.soarai@gmail.com",
+								"name": "Josh"
+							}
+						],
+						"html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Josh</span> &lt;<a href=\"mailto:josh.soarai@gmail.com\" class=\"mp_address_email\">josh.soarai@gmail.com</a>&gt;</span>",
+						"text": "\"Josh\" <josh.soarai@gmail.com>"
+					},
+					"messageId": "<E7983492-8FE7-4B90-955F-59D24393F545@gmail.com>",
+					"inReplyTo": "<CAMmGHAUPp99QF9QOHG5LugDmy6vUbaOUY_D2Oz4aQuciwsbkLw@mail.gmail.com>"
+				}
+			}
+		]
+	},
+	"connections": {
+		"New Email Trigger": {
+			"main": [
+				[
+					{
+						"node": "Email Classification Agent",
+						"type": "main",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Add Label": {
+			"ai_tool": [
+				[
+					{
+						"node": "Email Classification Agent",
+						"type": "ai_tool",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Get all Labels": {
+			"ai_tool": [
+				[
+					{
+						"node": "Email Classification Agent",
+						"type": "ai_tool",
+						"index": 0
+					}
+				]
+			]
+		},
+		"Model": {
+			"ai_languageModel": [
+				[
+					{
+						"node": "Email Classification Agent",
+						"type": "ai_languageModel",
+						"index": 0
+					}
+				]
+			]
+		}
+	},
+	"active": false,
+	"settings": {
+		"executionOrder": "v1"
+	},
+	"tags": []
+}

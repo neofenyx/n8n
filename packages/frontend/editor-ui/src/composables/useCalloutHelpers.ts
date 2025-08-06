@@ -4,7 +4,7 @@ import { useTelemetry } from '@/composables/useTelemetry';
 import { useRootStore } from '@n8n/stores/useRootStore';
 import { useUsersStore } from '@/stores/users.store';
 import { VIEWS } from '@/constants';
-import { getRagStarterWorkflowJson } from '@/utils/easyAiWorkflowUtils';
+import { getRagStarterWorkflowJson } from '@/utils/templates/workflowSamples';
 import { updateCurrentUserSettings } from '@/api/users';
 import { useWorkflowsStore } from '@/stores/workflows.store';
 
