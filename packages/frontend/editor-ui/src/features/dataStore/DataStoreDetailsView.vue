@@ -4,6 +4,9 @@ import type { DataStoreEntity } from '@/features/dataStore/datastore.types';
 import { useDataStoreStore } from './dataStore.store';
 import { useToast } from '@/composables/useToast';
 import { useI18n } from '@n8n/i18n';
+import { useRouter } from 'vue-router';
+import { DATA_STORE_VIEW } from './constants';
+import DataStoreBreadcrumbs from './components/DataStoreBreadcrumbs.vue';
 
 type Props = {
 	id: string;
@@ -14,11 +17,20 @@ const props = defineProps<Props>();
 
 const toast = useToast();
 const i18n = useI18n();
+const router = useRouter();
 
 const dataStoreStore = useDataStoreStore();
 
 const loading = ref(false);
 const dataStore = ref<DataStoreEntity | null>(null);
+
+const showErrorAndGoBackToList = async (error: unknown) => {
+	if (!(error instanceof Error)) {
+		error = new Error(String(i18n.baseText('dataStore.getDetails.error')));
+	}
+	toast.showError(error, i18n.baseText('dataStore.getDetails.error'));
+	await router.push({ name: DATA_STORE_VIEW, params: { projectId: props.projectId } });
+};
 
 const initialize = async () => {
 	loading.value = true;
@@ -27,13 +39,10 @@ const initialize = async () => {
 		if (response) {
 			dataStore.value = response;
 		} else {
-			toast.showError(
-				new Error(i18n.baseText('dataStore.notFound')),
-				i18n.baseText('dataStore.getDetails.error'),
-			);
+			await showErrorAndGoBackToList(new Error(i18n.baseText('dataStore.notFound')));
 		}
 	} catch (error) {
-		toast.showError(error, i18n.baseText('dataStore.getDetails.error'));
+		await showErrorAndGoBackToList(error);
 	} finally {
 		loading.value = false;
 	}
@@ -57,7 +66,9 @@ onMounted(async () => {
 			<n8n-loading :loading="true" variant="h1" :rows="10" :shrink-last="false" />
 		</div>
 		<div v-else-if="dataStore">
-			<h1>{{ dataStore.name }}</h1>
+			<div :class="$style.header">
+				<DataStoreBreadcrumbs :data-store="dataStore" />
+			</div>
 		</div>
 	</div>
 </template>
