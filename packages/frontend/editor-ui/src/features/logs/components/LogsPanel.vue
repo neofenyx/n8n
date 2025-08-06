@@ -16,6 +16,8 @@ import { useLogsStore } from '@/stores/logs.store';
 import { useLogsPanelLayout } from '@/features/logs/composables/useLogsPanelLayout';
 import { type KeyMap } from '@/composables/useKeybindings';
 import LogsViewKeyboardEventListener from './LogsViewKeyboardEventListener.vue';
+import { useLocalStorage } from '@vueuse/core';
+import { LOCAL_STORAGE_IS_POP_OUT_ONBOARDED } from '@/constants';
 
 const props = withDefaults(defineProps<{ isReadOnly?: boolean }>(), { isReadOnly: false });
 
@@ -92,6 +94,9 @@ const outputCollapsingColumnName = computed(() =>
 		? (outputTableColumnCollapsing.value?.columnName ?? null)
 		: null,
 );
+const isPopOutOnboarded = useLocalStorage(LOCAL_STORAGE_IS_POP_OUT_ONBOARDED, false, {
+	writeDefaults: false,
+});
 
 const keyMap = computed<KeyMap>(() => ({
 	j: selectNext,
@@ -133,6 +138,10 @@ function handleChangeOutputTableColumnCollapsing(columnName: string | null) {
 	outputTableColumnCollapsing.value =
 		columnName && selected.value ? { nodeName: selected.value.node.name, columnName } : undefined;
 }
+
+function handleBack() {
+	window.close();
+}
 </script>
 
 <template>
@@ -143,13 +152,13 @@ function handleChangeOutputTableColumnCollapsing(columnName: string | null) {
 			:key-map="keyMap"
 			:container="container"
 		/>
-		<div ref="pipContent" :class="$style.pipContent">
+		<div ref="pipContent" :class="[$style.pipContent, isPoppedOut ? $style.poppedOut : '']">
 			<N8nResizeWrapper
-				:height="height"
+				:height="isPoppedOut ? undefined : height"
 				:supported-directions="['top']"
 				:is-resizing-enabled="!isPoppedOut"
 				:class="$style.resizeWrapper"
-				:style="{ height: isOpen ? `${height}px` : 'auto' }"
+				:style="{ height: isOpen && !isPoppedOut ? `${height}px` : 'auto' }"
 				@resize="onResize"
 				@resizeend="onResizeEnd"
 			>
@@ -240,6 +249,16 @@ function handleChangeOutputTableColumnCollapsing(columnName: string | null) {
 					</div>
 				</div>
 			</N8nResizeWrapper>
+			<div v-if="isPoppedOut && !isPopOutOnboarded" :class="$style.popoutOnboarding">
+				<N8nText color="text-base">
+					Hi there, please move the tab to a new window and layout as you want!
+				</N8nText>
+				<img src="/static/popout-instruction.png" />
+				<div :class="$style.popoutOnboardingButtons">
+					<N8nButton type="secondary" @click="handleBack">Go back</N8nButton>
+					<N8nButton @click="() => (isPopOutOnboarded = true)">Understood</N8nButton>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -250,6 +269,29 @@ function handleChangeOutputTableColumnCollapsing(columnName: string | null) {
 		height: 100% !important;
 		max-height: 100vh !important;
 	}
+}
+
+.popoutOnboarding {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-s);
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+
+	& img {
+		width: 400px;
+	}
+}
+
+.popoutOnboardingButtons {
+	display: flex;
+	gap: var(--spacing-s);
 }
 
 .pipContent {
@@ -264,6 +306,10 @@ function handleChangeOutputTableColumnCollapsing(columnName: string | null) {
 	flex-basis: 0;
 	border-top: var(--border-base);
 	background-color: var(--color-background-light);
+
+	.poppedOut & {
+		border-top: none;
+	}
 }
 
 .container {

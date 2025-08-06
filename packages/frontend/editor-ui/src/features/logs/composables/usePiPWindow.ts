@@ -71,11 +71,7 @@ export function usePiPWindow({
 }: UsePiPWindowOptions): UsePiPWindowReturn {
 	const pipWindow = ref<Window>();
 	const isUnmounting = ref(false);
-	const canPopOut = computed(
-		() =>
-			!!window.documentPictureInPicture /* Browser supports the API */ &&
-			window.parent === window /* Not in iframe */,
-	);
+	const canPopOut = computed(() => window.parent === window /* Not in iframe */);
 	const isPoppedOut = computed(() => !!pipWindow.value);
 	const tooltipContainer = computed(() =>
 		isPoppedOut.value ? (content.value ?? undefined) : undefined,
@@ -100,11 +96,18 @@ export function usePiPWindow({
 
 		pipWindow.value =
 			pipWindow.value ??
-			(await window.documentPictureInPicture?.requestWindow({
-				width: initialWidth,
-				height: initialHeight,
-				disallowReturnToOpener: true,
-			}));
+			window.open(
+				'',
+				'_blank',
+				`popup=yes,width=${initialWidth},height=${initialHeight},left=100,top=100,toolbar=no,menubar=no,scrollbars=yes,resizable=yes`,
+			) ??
+			undefined;
+
+		if (!pipWindow.value) {
+			return;
+		}
+
+		pipWindow.value.document.title = 'Logs';
 
 		// Copy style sheets over from the initial document
 		// so that the content looks the same.
