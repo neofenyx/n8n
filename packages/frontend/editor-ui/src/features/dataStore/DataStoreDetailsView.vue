@@ -48,6 +48,14 @@ const initialize = async () => {
 	}
 };
 
+const onAddColumnClick = () => {
+	toast.showMessage({
+		type: 'warning',
+		message: 'Coming soon',
+		duration: 3000,
+	});
+};
+
 onMounted(async () => {
 	await initialize();
 });
@@ -68,6 +76,17 @@ onMounted(async () => {
 		<div v-else-if="dataStore">
 			<div :class="$style.header">
 				<DataStoreBreadcrumbs :data-store="dataStore" />
+			</div>
+			<div :class="$style.content">
+				<n8n-action-box
+					v-if="dataStore.columns.length === 0"
+					data-test-id="empty-shared-action-box"
+					:heading="i18n.baseText('dataStore.noColumns.heading')"
+					:description="i18n.baseText('dataStore.noColumns.description')"
+					:button-text="i18n.baseText('dataStore.noColumns.button.label')"
+					button-type="secondary"
+					@click:button="onAddColumnClick"
+				/>
 			</div>
 		</div>
 	</div>
@@ -91,5 +110,12 @@ onMounted(async () => {
 	div {
 		height: 2em;
 	}
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: var(--spacing-xl);
 }
 </style>
